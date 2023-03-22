@@ -1,0 +1,95 @@
+% MATLAB CODE FOR ADAPTIVE CRUISE CONTROL FOR VEHICLE
+% CODE BY PRAVEENRAJ.U, RAMKUMAR.R, SRIHARI.R
+
+% INVOKING ARDUINO LIBRARIES INTO THE PROGRAM
+a = arduino('COM6','Uno','Libraries',{'Ultrasonic','ExampleLCD/LCDAddon'},'ForceBuildOn',true);
+
+% ULTRASONIC SENSOR IS INVOKED
+ultrasonic_sensor = ultrasonic(a,'D4','D5','OutputFormat','double');
+
+% INITIALIZING LCD DISPLAY AND PIN CONFIGURATION IN ARDUINO
+lcd = addon(a,'ExampleLCD/LCDAddon','RegisterSelectPin','D8','EnablePin','D13','DataPins',{'D12','D11','D10','D9'});
+initializeLCD(lcd);
+
+% INITIALIZING EVERY VARIABLES TO ZERO 
+[accelerator,speed_down,reset,set_speed,adaptive_cc,flag,speed] = deal(0); 
+
+% CREATING A SINGLE WHILE LOOP FOR WHOLE FUNCTIONING
+while 1
+% BUTTON CONFIGURATION WITH ARDUINO BOARD PINS AND PROGRAM 
+    accelerator = readVoltage(a,'A1'); %increases the speed
+    speed_down = readVoltage(a,'A2');   %decrease the speed
+    reset = readVoltage(a,'A3');        %resets
+    set_speed = readVoltage(a,'A4');    %sets a constant speed
+    adaptive_cc = readVoltage(a,'A5');  %acc-mode button
+    offset_sensor = readDistance(ultrasonic_sensor); %sensor variable for finding offset distance
+
+% LOGIC OF ADAPTIVE CRUISE CONTROL IS DEVELOPED USING NESTED IF-ELSE    
+    if flag==0
+        % SPEED INCREASE WITH THIS BUTTON PRESSED
+        if accelerator>=4
+            speed=speed+1;
+        % SPEED DECREASES WHEN THE BUTTON IS PRESSED   
+        elseif speed_down>=4
+            speed=speed-2;
+        % IF ACCELERATOR BUTTON NOT PRESSED SPEED DECREASES    
+        else
+            speed=speed-1;
+        end
+    % FLAG 1 IS CRUISEMODE/SET-SPEED, SPEED REMAINS CONSTANT    
+    elseif flag==1 
+        speed=speed
+    % VARIATION OF SPEED IN ACC-MODE USING SENSOR  
+    elseif flag==2
+        %setting up offset distance conditions using if-else ladder
+        if offset_sensor<0.3
+            speed=speed-1;
+        else
+            speed=speed+1;
+        end
+        if speed>max_speed
+            speed=max_speed;
+        end
+        
+    end
+    % SETTING A CONSTANT SPEED OR CRUISE MODE OF A VEHICLE
+    if set_speed>=4
+       
+        flag=1;
+    % ENABLING ADAPTIVE CRUISE CONTROL-MODE    
+    elseif adaptive_cc>=4
+       
+        flag=2;
+        max_speed=speed;
+    elseif reset>=4
+        flag=0;
+    elseif accelerator>=4 && flag~=2
+        speed=speed+1;
+    elseif speed_down>=4 && flag~=2
+        speed=speed-1;
+    end
+    if speed<0
+        speed=0;
+    end 
+    % DISPLAY MESSAGE ON THE LCD FOR ACC MODE
+    if flag==2
+        %DISPLAY FLICKERS AT A RATE OF 0.3s DURING THE ADAPTIVE CRUISE MODE
+        clearLCD(lcd);
+        pause(0.3);
+        printLCD(lcd,'SPEED:');
+        printLCD(lcd,[strcat(num2str(speed),'MPH',' ADAP-CC')]);
+        pause(0.3);
+        clearLCD(lcd);
+    % DISPLAY MESSAGE ON THE LCD FOR CRUISE MODE    
+    elseif flag==1
+        printLCD(lcd,'SPEED: ');
+        printLCD(lcd,[strcat(num2str(speed),'MPH','     CC')]);
+    % DISPLAY MESSAGE ON THE LCD FOR OTHER MODE 
+    else
+        printLCD(lcd,'SPEED: ');
+        printLCD(lcd,[strcat(num2str(speed),'MPH','     ')]);    
+    end
+    
+end
+
+%CODE ENDS.

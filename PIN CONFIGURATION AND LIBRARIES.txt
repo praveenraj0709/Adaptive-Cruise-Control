@@ -1,0 +1,27 @@
+ARDUINO PINS CONFIGURATION
+•	5V pin is connected to the positive end of the breadboard
+•	GND pin is connected to the negative end of the breadboard
+•	D13 pin is connected to E pin in the LCD component
+•	D12 pin is connected to D4 pin in the LCD component
+•	D11 pin is connected to D5 pin in the LCD component
+•	D10 pin is connected to D6 pin in the LCD component
+•	D9 pin is connected to D7 pin in the LCD component
+•	D8 pin is connected to RS pin in the LCD component
+•	D5 pin is connected to ECHO pin in the Ultrasonic Sensor
+•	D4 pin is connected to TRIGGER pin in the Ultrasonic Sensor
+•	A1 pin is connected to the button B1 (Increase_speed)
+•	A2 pin is connected to the button B2 (Decrease_speed)
+•	A3 pin is connected to the button B3 (Cancel)
+•	A4 pin is connected to the button B4 (Set_speed)
+•	A5 pin is connected to the button B5 (Adaptive_speed)
+
+LIBRARIES INCLUDED
+
+MATLAB Support Package for Arduino Hardware
+The default Arduino package was installed from the MATLAB online resources. The COM ports were assigned with necessary prebuilt functions to detect the Arduino inside the program.
+
+Arduino LCD connection
+LCD library was downloaded added into the root directory folder. (EXAMPLE_LCD)
+
+
+
